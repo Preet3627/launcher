@@ -22,7 +22,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore src/Flarial.Launcher/Flarial.Launcher.csproj
 
       - name: Build Launcher
         run: dotnet build src/Flarial.Launcher/Flarial.Launcher.csproj -c Release --no-restore
