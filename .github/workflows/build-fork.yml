@@ -1,0 +1,45 @@
+name: Build Launcher (Fork CI)
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Launcher (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Launcher
+        run: dotnet build src/Flarial.Launcher/Flarial.Launcher.csproj -c Release --no-restore
+
+      - name: Upload Launcher Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flarial-Launcher-x64-Release
+          path: src/Flarial.Launcher/bin/x64/Release/
+          retention-days: 30
+
+      - name: Upload as Release (workflow_dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src/Flarial.Launcher/bin/x64/Release/Flarial.Launcher.exe
+          tag_name: fork-launcher-${{ github.sha }}
+          name: "Fork Launcher Build"
+          body: "Auto-built from ${{ github.sha }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
